@@ -62,7 +62,7 @@ CLI 当前只保留一个参数：
 其余运行配置为脚本内部常量（`main.py`）：
 
 - `MAX_ITEMS`：每个关键词最大爬取数量（默认 `30`）
-- `HEADLESS`：是否无头模式（默认 `False`）
+- `HEADLESS`：抓取阶段是否无头模式（默认 `True`）
 - `MAX_CONCURRENCY`：并行抓取关键词上限（默认 `5`）
 - `MAX_PROMPT_TOKENS`：单次提示词输入预算上限（默认 `250000`）
 - `ANALYZE_MAX_CONCURRENCY`：关键词级分析并发上限（默认 `4`）
@@ -204,6 +204,7 @@ xhs_20260512_200406_网球_15.jsonl
 ## 8. 登录说明
 
 - 并发抓取前会先执行一次统一登录预检
+- 登录预检当前固定使用有头模式（`headless=False`），便于人工扫码/验证码登录
 - 首次运行或登录态失效时，预检阶段可能需要短信验证码登录（仅一次）
 - 登录成功后会保存登录态到 `state.json`
 - 后续运行会复用本地登录态（若有效）
@@ -241,7 +242,7 @@ import brain
 report = brain.analyze_data_multi_stage(
     keyword_paths=["data/k1.jsonl", "data/k2.jsonl"],
     keywords=["关键词1", "关键词2"],
-    max_prompt_tokens=110000,
+    max_prompt_tokens=250000,
     analyze_max_concurrency=4,
 )
 result_path = brain.save_global_report(report, stem="custom")

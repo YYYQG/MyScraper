@@ -294,7 +294,11 @@ async def _iter_notes(page, max_items, max_comments=MAX_COMMENTS, max_idle_round
     while len(results) < max_items:
         index = index + 1
         #爬取笔记信息
-        card = page.locator(f"//div[@class='feeds-container']/section[@class='note-item' and @data-index='{index}']")
+        try:
+            card = page.locator(f"//div[@class='feeds-container']/section[@class='note-item' and @data-index='{index}']")
+        except Exception as e:
+            print(f"未找到该笔记: {e}")
+            continue
 
         # 只处理当前视口内的新卡片：优先用 href
         note_id = await card.evaluate(

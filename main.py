@@ -1,52 +1,18 @@
 import argparse
 import asyncio
-import json
-import os
-from datetime import datetime
 import scrape
 import brain
 
 # 可修改配置
 KEYWORD = "羽毛球鞋" # 搜索关键词[***脚本参数***]
-MAX_ITEMS = 30 # 最大爬取数量[***内部配置***]
-HEADLESS = False # 是否无头模式[***内部配置***]
+MAX_ITEMS = 5 # 最大爬取数量[***内部配置***]
+HEADLESS = True # 是否无头模式[***内部配置***]
 MAX_CONCURRENCY = 5 # 并行抓取关键词数量上限[***内部配置***]
 MAX_PROMPT_TOKENS = 250000 # 大模型输入预算上限[***内部配置***]
 ANALYZE_MAX_CONCURRENCY = 4 # 关键词级分析并发上限[***内部配置***]
 
 # 常量
 DATA_PATH = "data/" # 数据保存路径
-
-
-def _merge_jsonl(paths: list[str], keyword: str, max_items: int) -> str:
-    '''
-    合并多个jsonl文件为一个
-    Args:
-        paths: jsonl文件路径列表
-        keyword: 原始关键词
-        max_items: 最大爬取数量
-    Returns:
-        str: 合并后的文件路径
-    '''
-    all_items: list[dict] = []
-    for p in paths:
-        with open(p, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    all_items.append(json.loads(line))
-
-    os.makedirs(DATA_PATH, exist_ok=True)
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"xhs_{ts}_{keyword}_{max_items}_merged.jsonl"
-    filepath = os.path.join(DATA_PATH, filename)
-
-    with open(filepath, "w", encoding="utf-8") as f:
-        for item in all_items:
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
-
-    return filepath
-
 
 async def _scrape_keywords_parallel(
     keywords: list[str],
@@ -98,7 +64,7 @@ def run_pipeline(keyword: str) -> str:
 
     # 2. 并发前统一登录预检
     print(f">>>开始登录预检")
-    asyncio.run(scrape.ensure_login_ready(headless=HEADLESS))
+    asyncio.run(scrape.ensure_login_ready(headless=False))
     print(f">>>登录预检完成")
 
     # 3. 并行抓取每个关键词（带并发上限）
