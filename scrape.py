@@ -66,11 +66,12 @@ async def _load_login_info(state_path: str, browser: Browser)-> BrowserContext:
     Returns:
         Context: 上下文对象
     '''
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     if os.path.exists(state_path):
-        context = await browser.new_context(storage_state=state_path, viewport=ViewportSize(width=1920, height=1080))
+        context = await browser.new_context(storage_state=state_path, viewport=ViewportSize(width=1920, height=1080), user_agent=user_agent)
         print("已加载本地登录态")
     else:
-        context = await browser.new_context()
+        context = await browser.new_context(viewport=ViewportSize(width=1920, height=1080), user_agent=user_agent)
         print("未加载本地登录态")
 
     await context.add_init_script(path="stealth_min.js")
@@ -161,7 +162,8 @@ async def ensure_login_ready(headless: bool) -> None:
             channel="chrome",
             headless=headless,
             slow_mo=50,
-            # args=["--auto-open-devtools-for-tabs"]
+            #args=["--auto-open-devtools-for-tabs"]
+            #args=["--remote-debugging-port=9111"]
         )
         try:
             context = await _load_login_info(STATE_PATH, browser)
@@ -303,7 +305,7 @@ async def _iter_notes(page, max_items, max_comments=MAX_COMMENTS, max_idle_round
         # 只处理当前视口内的新卡片：优先用 href
         note_id = await card.evaluate(
             """(el) => {
-                const anchor = el.querySelector("a[href^='/explore/']");
+                const anchor = el.querySelector("a[href^='/search_result/']");
                 if (anchor) {
                     return anchor.getAttribute("href");
                 }
